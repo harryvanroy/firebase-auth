@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 export const Signup = () => {
   const [validated, setValidated] = useState(false);
   const [values, setValues] = useState({
@@ -8,8 +10,9 @@ export const Signup = () => {
     password: "",
     confirmPassword: "",
   });
+  const navigate = useNavigate();
+  const { signUp } = useAuth();
 
-  const { signup } = useAuth();
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValues({
       ...values,
@@ -26,7 +29,8 @@ export const Signup = () => {
     ) {
       event.stopPropagation();
     } else {
-      await signup(values.email, values.password);
+      await signUp(values.email, values.password);
+      navigate("/");
     }
     setValidated(true);
   };
@@ -81,7 +85,7 @@ export const Signup = () => {
                     Passwords do not match.
                   </Form.Control.Feedback>
                 </Form.Group>
-                <Button variant="primary" type="submit">
+                <Button className="w-100" variant="primary" type="submit">
                   Submit
                 </Button>
               </Form>
