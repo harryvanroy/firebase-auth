@@ -1,11 +1,13 @@
 import React from "react";
+import { Signup } from "./Signup";
+import { AuthProvider } from "../contexts/AuthContext";
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <h1>test</h1>
-    </div>
+    <AuthProvider>
+      <Signup />
+    </AuthProvider>
   );
-}
+};
 
 export default App;

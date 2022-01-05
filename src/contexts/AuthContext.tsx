@@ -1,13 +1,20 @@
-import React, { useState, useContext, createContext, ReactNode } from "react";
+import React, {
+  useState,
+  useContext,
+  createContext,
+  ReactNode,
+  useEffect,
+} from "react";
 import { auth } from "../firebase";
 import {
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
+  User,
   UserCredential,
 } from "firebase/auth";
 
 interface AuthContextType {
-  currentUser?: UserCredential;
+  currentUser?: User;
+  signup: (email: string, password: string) => Promise<UserCredential>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -17,19 +24,25 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [currentUser, setCurrentUser] = useState<UserCredential>();
+  const [currentUser, setCurrentUser] = useState<User>();
 
   const signup = (email: string, password: string) => {
     return createUserWithEmailAndPassword(auth, email, password);
   };
 
-  const login = (email: string, password: string) => {
-    return signInWithEmailAndPassword(auth, email, password);
-  };
-
   const value = {
     currentUser,
+    signup,
   };
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setCurrentUser(user);
+      }
+    });
+    return unsubscribe;
+  }, []);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
