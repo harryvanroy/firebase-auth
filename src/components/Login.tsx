@@ -101,14 +101,15 @@ export const Login = () => {
                   Submit
                 </Button>
               </Form>
+              <div className="text-center"> or</div>
+              <Button
+                className="w-100 text-center mt-2"
+                onClick={handleGoogleLogin}
+              >
+                <i className="fab fa-google"></i> Sign in with Google
+              </Button>
             </Card.Body>
           </Card>
-          <Button
-            className="w-100 text-center mt-2"
-            onClick={handleGoogleLogin}
-          >
-            Login with Google
-          </Button>
           <div className="w-100 text-center mt-2">
             Need an account? <Link to="/signup">Sign Up</Link>
           </div>
