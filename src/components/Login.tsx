@@ -40,18 +40,22 @@ export const Login = () => {
         navigate("/");
       } catch (error) {
         if (error instanceof FirebaseError) {
-          if (error.code === "auth/user-not-found") {
-            setError("User not found");
+          console.log(error.code);
+          if (
+            error.code === "auth/user-not-found" ||
+            error.code === "auth/wrong-password"
+          ) {
+            setError("Incorrect email or password");
           } else {
             setError("An error occurred. Please try again.");
           }
         }
+        setValidated(true);
       }
     } else {
       event.stopPropagation();
+      setValidated(true);
     }
-
-    setValidated(true);
   };
 
   const handleGoogleLogin = async () => {

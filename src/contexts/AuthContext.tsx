@@ -15,6 +15,7 @@ import {
   User,
   UserCredential,
 } from "firebase/auth";
+import { Container, Spinner, Row } from "react-bootstrap";
 
 interface AuthContextType {
   currentUser?: User;
@@ -32,6 +33,7 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [currentUser, setCurrentUser] = useState<User>();
+  const [loading, setLoading] = useState(true);
 
   const signUp = (email: string, password: string) => {
     return createUserWithEmailAndPassword(auth, email, password);
@@ -59,15 +61,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    return auth.onAuthStateChanged((user) => {
       if (user) {
         setCurrentUser(user);
       }
+      setLoading(false);
     });
-    return unsubscribe;
   }, []);
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {loading ? (
+        <Container className="d-flex vh-100">
+          <Row className="m-auto align-self-center">
+            <Spinner animation="border" />
+          </Row>
+        </Container>
+      ) : (
+        children
+      )}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {

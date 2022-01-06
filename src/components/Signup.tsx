@@ -1,10 +1,20 @@
 import React, { useState } from "react";
-import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Form,
+  Button,
+  Alert,
+} from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { FirebaseError } from "@firebase/util";
 
 export const Signup = () => {
   const [validated, setValidated] = useState(false);
+  const [error, setError] = useState("");
   const [values, setValues] = useState({
     email: "",
     password: "",
@@ -23,16 +33,31 @@ export const Signup = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
-    if (
-      form.checkValidity() === false ||
-      values.password !== values.confirmPassword
-    ) {
-      event.stopPropagation();
+    if (form.checkValidity()) {
+      try {
+        await signUp(values.email, values.password);
+        navigate("/");
+      } catch (error) {
+        if (error instanceof FirebaseError) {
+          switch (error.code) {
+            case "auth/email-already-in-use":
+              setError("Email already in use");
+              break;
+            case "auth/invalid-email":
+              setError("Invalid email");
+              break;
+            case "auth/weak-password":
+              setError("Password is too weak");
+              break;
+            default:
+          }
+        }
+        setValidated(true);
+      }
     } else {
-      await signUp(values.email, values.password);
-      navigate("/");
+      event.stopPropagation();
+      setValidated(true);
     }
-    setValidated(true);
   };
 
   return (
@@ -42,6 +67,7 @@ export const Signup = () => {
           <Card>
             <Card.Body>
               <Card.Title className="text-center">Sign Up</Card.Title>
+              {error && <Alert variant="danger">{error}</Alert>}
               <Form noValidate validated={validated} onSubmit={handleSubmit}>
                 <Form.Group className="mb-3" controlId="email">
                   <Form.Label>Email address</Form.Label>
@@ -72,25 +98,15 @@ export const Signup = () => {
                     Please enter a password.
                   </Form.Control.Feedback>
                 </Form.Group>
-                <Form.Group className="mb-3" controlId="confirmPassword">
-                  <Form.Label>Confirm Password</Form.Label>
-                  <Form.Control
-                    required
-                    type="password"
-                    placeholder="Password"
-                    value={values.confirmPassword}
-                    onChange={handleChange}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    Passwords do not match.
-                  </Form.Control.Feedback>
-                </Form.Group>
                 <Button className="w-100" variant="primary" type="submit">
                   Submit
                 </Button>
               </Form>
             </Card.Body>
           </Card>
+          <div className="w-100 text-center mt-2">
+            Already have an account? <Link to="/login">Log in</Link>
+          </div>
         </Col>
       </Row>
     </Container>
